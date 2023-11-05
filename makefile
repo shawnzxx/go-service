@@ -44,7 +44,6 @@ service:
 
 # ==============================================================================
 # Running from within k8s/kind
-dev-up: dev-up-local
 
 dev-up-local:
 	kind create cluster \
@@ -57,6 +56,16 @@ dev-up-local:
 dev-down-local:
 	kind delete cluster --name $(KIND_CLUSTER)
 
+dev-down:
+	kind delete cluster --name $(KIND_CLUSTER)
+
+dev-load:
+	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
+
+dev-apply:
+	kustomize build zarf/k8s/dev/sales | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --for=condition=Ready
+
 # ==============================================================================
 
 dev-status:
@@ -64,12 +73,25 @@ dev-status:
 	kubectl get svc -o wide
 	kubectl get pods -o wide --watch --all-namespaces
 
+dev-restart:
+	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
+
+# if you changed the binary then run this command to re-load image to kind cluster
+dev-update: all dev-load dev-restart
+
+# if you changed the k8s configuration then run this command to re-apply new settings
+dev-update-apply: all dev-load dev-apply
+
 # ------------------------------------------------------------------------------
+
+dev-logs:
+	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP) --all-containers=true -f --tail=100
+
+# ==============================================================================
+
+run-local:
+	go run app/services/sales-api/main.go
 
 tidy:
 	go mod tidy
 	go mod vendor
-
-
-run-local:
-	go run app/services/sales-api/main.go
