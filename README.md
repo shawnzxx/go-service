@@ -1,3 +1,6 @@
+## reference
+https://github.com/ardanlabs/service4.1-video/commits/main?after=441f495cc8882d24d68767ea27cc4dbc1ebc5359+69&branch=main&qualified_name=refs%2Fheads%2Fmain
+
 ## Design Philosophy
 1. don't make things easier to do, make thing easier to understand (write code in mentality for next person will maintian it)
 1. Don't add complexity until we need it (you start with mono, then envolve to microservice)
