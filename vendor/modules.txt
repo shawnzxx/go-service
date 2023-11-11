@@ -1,3 +1,6 @@
+# github.com/ardanlabs/conf/v3 v3.1.7
+## explicit; go 1.13
+github.com/ardanlabs/conf/v3
 # go.uber.org/multierr v1.10.0
 ## explicit; go 1.19
 go.uber.org/multierr

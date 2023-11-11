@@ -5,6 +5,7 @@ https://github.com/ardanlabs/service4.1-video/commits/main?after=441f495cc8882d2
 1. don't make things easier to do, make thing easier to understand (write code in mentality for next person will maintian it)
 1. Don't add complexity until we need it (you start with mono, then envolve to microservice)
 1. everything we do must be precise
+1. write code always start from readability then refactor to find a simplicity
 
 ## Deploy first and then development
 start from day 1, for local development you shall try to setup and test your work on local with similar enviroment setup like in staging and production, things like we want to run our applications on k8s for local deployment
@@ -59,4 +60,10 @@ compile time polymorphism (generic) VS runtime polymorphism (interface)
 always use runtime polymorphism
 when you use reflect then consider change to compile time polymorphism
 
+## configuration
+### rules
+- only place to read configuration is on main.go, and pass configuration down to other parts of program
+- your application binary should allow to type "help" can print out all configuration options availiabe in your program, including default configuration, no singlton
+- any default you have should be aloow to overwritten through env vairable or command line flags, you need to support both and command line flag shall rule them all
+- default, default, default whoever clone the program down, need to run your program without any code change. except those Azure keys need to configured, but you need to write clear instruction how to do it in README.md file
 
