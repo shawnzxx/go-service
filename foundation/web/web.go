@@ -23,19 +23,27 @@ type App struct {
 	// this is embeded in App struct (filed without name), so App can use anything from ContextMux
 	*httptreemux.ContextMux
 	shutdown chan os.Signal
+	mw       []Middleware
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
-func NewApp(shutdown chan os.Signal) *App {
+// input can pass in 0~many middleware
+func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	return &App{
 		ContextMux: httptreemux.NewContextMux(),
 		shutdown:   shutdown,
+		mw:         mw,
 	}
 }
 
 // Handle sets a handler function for a given HTTP method and path pair
-// to the application server mux.
-func (a *App) Handle(method string, path string, handler Handler) {
+// to the application server mux
+// input can pass in 0~many middleware
+func (a *App) Handle(method string, path string, handler Handler, mw ...Middleware) {
+	// handler it's own middleware, depends on whether we inject any MW at handler, like auth middleware not all handlers may need it
+	handler = wrapMiddleware(mw, handler)
+	// app layer middleware need to execute for all handlers, like logger middleware
+	handler = wrapMiddleware(a.mw, handler)
 
 	// we wrpped our own logic into original Handler function
 	h := func(w http.ResponseWriter, r *http.Request) {
