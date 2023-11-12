@@ -67,3 +67,10 @@ when you use reflect then consider change to compile time polymorphism
 - any default you have should be aloow to overwritten through env vairable or command line flags, you need to support both and command line flag shall rule them all
 - default, default, default whoever clone the program down, need to run your program without any code change. except those Azure keys need to configured, but you need to write clear instruction how to do it in README.md file
 
+## shutdown
+concurrency VS parallel
+concurrency means undefined out of order execution
+parallel means you shall at least two threads and two cors running at same time
+
+Goroutine general principal: parent G can not terminate when still have child G running, make sure all child G terminated before parent G terminated. 
+one sample is: some people inside the handlder start a Go rountinue, then return the handler, then parent G terminated we still have child G running like orphan G
