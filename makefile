@@ -3,6 +3,29 @@ SHELL_PATH = /bin/ash
 SHELL = $(if $(wildcard $(SHELL_PATH)),/bin/ash,/bin/bash)
 
 # ==============================================================================
+# Brew Installation
+#
+#	Having brew installed will simplify the process of installing all the tooling.
+#
+#	Run this command to install brew on your machine. This works for Linux, Mac and Windows.
+#	The script explains what it will do and then pauses before it does it.
+#	$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+#
+# 	Install GCC:
+#	$ brew install gcc
+
+# ==============================================================================
+# Install Tooling and Dependencies
+#
+#   This project uses Docker and it is expected to be installed. Please provide
+#   Docker at least 3 CPUs.
+#
+#	Run these commands to install everything needed.
+#	$ make dev-brew
+#	$ make dev-docker
+#	$ make dev-gotooling
+
+# ==============================================================================
 # CLASS NOTES
 #
 # Kind
@@ -76,7 +99,12 @@ remove-none-images:
 # Running from within k8s/kind
 
 # dev cluster up
-dev-up:
+
+dev-up: dev-up-local
+	telepresence --context=kind-$(KIND_CLUSTER) helm install
+	telepresence --context=kind-$(KIND_CLUSTER) connect
+
+dev-up-local:
 	kind create cluster \
 		--image $(KIND) \
 		--name $(KIND_CLUSTER) \
@@ -86,7 +114,13 @@ dev-up:
 
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
 
-# for use telepresence need to install cli on local first
+dev-down:
+	kind delete cluster --name $(KIND_CLUSTER)
+
+dev-load:
+	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
+
+# if you have issue to run telepresence, run it seprately
 # follow this link: https://www.telepresence.io/docs/latest/quick-start/
 dev-load-telepresence:
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
@@ -94,11 +128,8 @@ dev-load-telepresence:
 	telepresence --context=kind-ardan-starter-cluster quit -u
 	telepresence --context=kind-ardan-starter-cluster connect
 
-dev-down:
+dev-down-local:
 	kind delete cluster --name $(KIND_CLUSTER)
-
-dev-load:
-	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
 
 dev-apply:
 	kustomize build zarf/k8s/dev/sales | kubectl apply -f -
@@ -151,4 +182,7 @@ metrics-view-local:
 
 test-endpoint:
 # k8s DNS location: https://yuminlee2.medium.com/kubernetes-dns-bdca7b7cb868#:~:text=In%20Kubernetes%2C%20DNS%20names%20are%20assigned%20to%20Pods%20and%20Services,format%20.
-	curl -il $(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:4000/debug/pprof
+	curl -il $(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:4000/debug/vars
+
+test-endpoint-local:
+	curl -il localhost:4000/debug/vars
