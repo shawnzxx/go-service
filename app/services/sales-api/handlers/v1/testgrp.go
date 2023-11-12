@@ -1,12 +1,13 @@
 package testgrp
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 )
 
 // Test is our test route path handler.
-func Test(w http.ResponseWriter, r *http.Request) {
+func Test(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 	// Handler's layer principal, handlers function shall only do below 4 things
 	// Validate the pass in data from request
@@ -19,5 +20,5 @@ func Test(w http.ResponseWriter, r *http.Request) {
 		Status: "OK",
 	}
 
-	json.NewEncoder(w).Encode(status)
+	return json.NewEncoder(w).Encode(status)
 }

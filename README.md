@@ -74,3 +74,8 @@ parallel means you shall at least two threads and two cors running at same time
 
 Goroutine general principal: parent G can not terminate when still have child G running, make sure all child G terminated before parent G terminated. 
 one sample is: some people inside the handlder start a Go rountinue, then return the handler, then parent G terminated we still have child G running like orphan G
+
+## Value VS Pointer
+general rule: 
+- if is pure data need to transfer in to the function, keep use value sementic
+- if is API means could shared by all program to call, then pointer sememtic, like NewApp, NexContextMux() ect. those are all APIs
