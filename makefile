@@ -182,7 +182,7 @@ metrics-view-local:
 
 test-endpoint:
 # k8s DNS location: https://yuminlee2.medium.com/kubernetes-dns-bdca7b7cb868#:~:text=In%20Kubernetes%2C%20DNS%20names%20are%20assigned%20to%20Pods%20and%20Services,format%20.
-	curl -il $(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:4000/debug/vars
+	curl -il $(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:3000/test
 
 test-endpoint-local:
-	curl -il localhost:4000/debug/vars
+	curl -il localhost:3000/test

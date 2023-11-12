@@ -41,10 +41,10 @@ a type system allow data input and output throught apis, we have two kind of typ
 - it allow output to come out
 
 ### api
-the api can choice received data in two ways, it can use concrete type, you can also write apis accept interface type: the data not based what it is, but based on what it can do (polymorphism)
+the api can choose received data in two ways, it can use concrete type, you can also write apis accept interface type: the data not based what it is, but based on what it can do (polymorphism)
 - what is polymorphism?
-I piece of code change it behivour depends on the type of concrete data it operating on
-you can write function to be polymorphism by saying I don't want concrete data by what it is I want concrete data based on what it can do
+`A piece of code change it behivour depends on the type of concrete data it operating on`
+you can write function to be polymorphism by saying I don't want concrete data by what it is, but I want concrete data based on what it can do
 
 
 Deploy first mentality
