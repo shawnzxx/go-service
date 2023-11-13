@@ -7,11 +7,14 @@ https://github.com/ardanlabs/service4.1-video/commits/main?after=441f495cc8882d2
 1. everything we do must be precise
 1. write code always start from readability then refactor to find a simplicity
 
-## Deploy first and then development
+## Deployment first
 start from day 1, for local development you shall try to setup and test your work on local with similar enviroment setup like in staging and production, things like we want to run our applications on k8s for local deployment
 
-### project principal
-folder structure not see more than 5 layers, this mgic number will keep you maintian mental model (this is what you understand code, review, code, talk/discuss your code)
+## Project principal
+We shall have kind of agreement for team
+project folder can not see more than 5 layers
+this mgic number will keep you maintian mental model
+Why becuase is easy for you understand code, review, code, talk/discuss your code
 ### 5 layers
 1. app layer
 all things we are build for binary like services and tools their main.go will exist inside app layer
@@ -23,6 +26,7 @@ eventually will move to it's own repo (company kit repo) or vendor folder, which
 this layer hold for other 3rd party dependencies or company internal library which your project will be used
 1. zarf layer
 layer of code that could hold everything need for docker, k8s, build, deployment, configuration
+
 ### layers relationship
 5 layers import shall only go down can't go up, if I see business layer tying to import app layer, code review stopped
 app can import everything because is the most top layer in 5, business layer can import their sub folder package or down from foundation layer
@@ -35,30 +39,24 @@ and every apis is data transformation
 package need to have same package name go file, logger folder need to have logger.go, and logger package
 one good way to identify package is contain instead of previde kind package: ask youself does it make sense to have file name call package.go? if doesn;t make sense to have package.go then you could be creating contain kind of package try to avoid it
 
-### type system
+### Type system
 a type system allow data input and output throught apis, we have two kind of type, concrete type or interface type 
 - it allow input come into the api (concrete data or interface type)
 - it allow output to come out
 
-### api
+### API
 the api can choose received data in two ways, it can use concrete type, you can also write apis accept interface type: the data not based what it is, but based on what it can do (polymorphism)
 - what is polymorphism?
 `A piece of code change it behivour depends on the type of concrete data it operating on`
 you can write function to be polymorphism by saying I don't want concrete data by what it is, but I want concrete data based on what it can do
 
 
-Deploy first mentality
-
-
+## Logging
 structure logging convert human readable log
 logger package should in foundation layer highly reusable across different project
 you can not have common,util package, every package should have reason, provide somethings like net, http is good package
 package provide or package common
 filename try to discribe the purpose then this is smell, package should describe purpose
-
-compile time polymorphism (generic) VS runtime polymorphism (interface)
-always use runtime polymorphism
-when you use reflect then consider change to compile time polymorphism
 
 ## configuration
 ### rules
@@ -79,3 +77,8 @@ one sample is: some people inside the handlder start a Go rountinue, then return
 general rule: 
 - if is pure data need to transfer in to the function, keep use value sementic
 - if is API means could shared by all program to call, then pointer sememtic, like NewApp, NexContextMux() ect. those are all APIs
+
+## polymorphism
+compile time polymorphism (generic) VS runtime polymorphism (interface)
+always use runtime polymorphism
+when you use reflect then consider change to compile time polymorphism

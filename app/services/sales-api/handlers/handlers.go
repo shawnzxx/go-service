@@ -5,6 +5,7 @@ import (
 	"os"
 
 	testgrp "github.com/shawnzxx/service/app/services/sales-api/handlers/v1"
+	"github.com/shawnzxx/service/business/web/v1/mid"
 	"github.com/shawnzxx/service/foundation/web"
 	"go.uber.org/zap"
 )
@@ -19,7 +20,7 @@ type APIMuxConfig struct {
 // Handlers design principal, input can be concrete type or interface type, but output return to caller must be a concrete type
 // func APIMux(cfg APIMuxConfig) http.Handler {
 func APIMux(cfg APIMuxConfig) *web.App {
-	app := web.NewApp(cfg.Shutdown)
+	app := web.NewApp(cfg.Shutdown, mid.Logger(cfg.Log))
 
 	app.Handle(http.MethodGet, "/test", testgrp.Test)
 
