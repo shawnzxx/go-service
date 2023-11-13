@@ -2,8 +2,9 @@ package testgrp
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
+
+	"github.com/shawnzxx/service/foundation/web"
 )
 
 // Test is our test route path handler.
@@ -20,5 +21,5 @@ func Test(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 		Status: "OK",
 	}
 
-	return json.NewEncoder(w).Encode(status)
+	return web.Respond(ctx, w, status, http.StatusOK)
 }
