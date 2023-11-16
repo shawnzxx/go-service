@@ -107,7 +107,7 @@ func run(log *zap.SugaredLogger) error {
 		Log:      log,
 	})
 
-	api := http.Server{
+	server := http.Server{
 		Addr:         cfg.Web.APIHost,
 		Handler:      apiMux,
 		ReadTimeout:  cfg.Web.ReadTimeout,
@@ -119,8 +119,8 @@ func run(log *zap.SugaredLogger) error {
 	serverErrors := make(chan error, 1)
 
 	go func() {
-		log.Infow("startup", "status", "api router started", "host", api.Addr)
-		serverErrors <- api.ListenAndServe()
+		log.Infow("startup", "status", "api router started", "host", server.Addr)
+		serverErrors <- server.ListenAndServe()
 	}()
 
 	// -------------------------------------------------------------------------
@@ -137,8 +137,8 @@ func run(log *zap.SugaredLogger) error {
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
 		defer cancel()
 
-		if err := api.Shutdown(ctx); err != nil {
-			api.Close()
+		if err := server.Shutdown(ctx); err != nil {
+			server.Close()
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 	}
