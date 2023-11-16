@@ -82,3 +82,8 @@ general rule:
 compile time polymorphism (generic) VS runtime polymorphism (interface)
 always use runtime polymorphism
 when you use reflect then consider change to compile time polymorphism
+
+## Error handlling
+error like vertical signall channel, downstream layer pass error back to top layer (standard lib -> foundation -> business -> application)
+we need define two types of csutom error, trustedError and shutdownError, other than these two error, all other errors return 500
+we shall create middlewear layer to handle above two errors

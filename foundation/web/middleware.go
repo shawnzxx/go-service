@@ -6,7 +6,7 @@ package web
 type Middleware func(Handler) Handler
 
 // wrapMiddleware creates a new handler by wrapping middleware around a final
-// handler. The middlewares' Handlers will be executed by requests in the order
+// handler. The middlewares handlers will be executed by requests in the order
 // they are provided.
 func wrapMiddleware(mw []Middleware, handler Handler) Handler {
 
