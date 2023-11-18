@@ -20,7 +20,7 @@ type APIMuxConfig struct {
 // Handlers design principal, input can be concrete type or interface type, but output return to caller must be a concrete type
 // func APIMux(cfg APIMuxConfig) http.Handler {
 func APIMux(cfg APIMuxConfig) *web.App {
-	app := web.NewApp(cfg.Shutdown, mid.Logger(cfg.Log), mid.Errors(cfg.Log), mid.Panics())
+	app := web.NewApp(cfg.Shutdown, mid.Logger(cfg.Log), mid.Errors(cfg.Log), mid.Metrics(), mid.Panics())
 
 	app.Handle(http.MethodGet, "/test", testgrp.Test)
 

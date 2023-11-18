@@ -87,3 +87,10 @@ when you use reflect then consider change to compile time polymorphism
 error like vertical signall channel, downstream layer pass error back to top layer (standard lib -> foundation -> business -> application)
 we need define two types of csutom error, trustedError and shutdownError, other than these two error, all other errors return 500
 we shall create middlewear layer to handle above two errors
+
+
+## Metrics
+### Rule of using singlton variable in package level?
+1. the order of initialization of this singlton variable is not important, can init at any time any order
+2. I don't need to inject any configuration during initialization, because when I need configuration we must construct in main and pass in
+3. the only code should touch this variable is in the package itself, means expose some API to allow outside access this variable
