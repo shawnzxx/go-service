@@ -1,4 +1,4 @@
-package ardan.rego
+package shawn.rego
 
 default allow = false
 
