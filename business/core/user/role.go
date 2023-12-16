@@ -20,6 +20,7 @@ type Role struct {
 }
 
 // ParseRole parses the string value and returns a role if one exists.
+// used by application layer, should not use by business layer, business layer should use Role type directly
 func ParseRole(value string) (Role, error) {
 	role, exists := roles[value]
 	if !exists {
@@ -30,8 +31,8 @@ func ParseRole(value string) (Role, error) {
 }
 
 // MustParseRole parses the string value and returns a role if one exists.
-// this function is only used for unit test
-// If an error occurs the function panics.
+// nobody should use Myst function in application layer, this function is only used for unit test
+// because we have panic in this function, so we can not use this function in any layer except test
 func MustParseRole(value string) Role {
 	role, err := ParseRole(value)
 	if err != nil {
@@ -57,7 +58,7 @@ func (r Role) MarshalText() ([]byte, error) {
 	return []byte(r.name), nil
 }
 
-// Equal provides support for the go-cmp package and testing.
+// Equal provides support for the go-compare package use for testing.
 func (r Role) Equal(r2 Role) bool {
 	return r.name == r2.name
 }

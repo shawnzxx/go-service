@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// this logger at business layer, becuase as top app layer's middleware it can log request and response in general
+// Logger at business layer, becuase as top app layer's middleware it can log request and response in general
 // later business layer logic also can use this logger to log business realted logs
 func Logger(log *zap.SugaredLogger) web.Middleware {
 	m := func(handler web.Handler) web.Handler {

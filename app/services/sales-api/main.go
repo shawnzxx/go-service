@@ -13,7 +13,9 @@ import (
 
 	"github.com/ardanlabs/conf/v3"
 	"github.com/shawnzxx/service/app/services/sales-api/handlers"
+	"github.com/shawnzxx/service/business/web/auth"
 	"github.com/shawnzxx/service/business/web/v1/debug"
+	"github.com/shawnzxx/service/foundation/keystore"
 	"github.com/shawnzxx/service/foundation/logger"
 	"go.uber.org/zap"
 )
@@ -54,6 +56,11 @@ func run(log *zap.SugaredLogger) error {
 			APIHost         string        `conf:"default:0.0.0.0:3000"`
 			DebugHost       string        `conf:"default:0.0.0.0:4000"`
 		}
+		Auth struct {
+			KeysFolder string `conf:"default:zarf/keys/"`
+			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
+			Issuer     string `conf:"default:service project"`
+		}
 	}{
 		Version: conf.Version{
 			Build: build,
@@ -84,6 +91,27 @@ func run(log *zap.SugaredLogger) error {
 	log.Infow("startup", "config", out)
 
 	// -------------------------------------------------------------------------
+	// Initialize authentication support
+
+	log.Infow("startup", "status", "initializing authentication support")
+
+	// Simple keystore versus using Vault.
+	ks, err := keystore.NewFS(os.DirFS(cfg.Auth.KeysFolder))
+	if err != nil {
+		return fmt.Errorf("reading keys: %w", err)
+	}
+
+	authCfg := auth.Config{
+		Log:       log,
+		KeyLookup: ks,
+	}
+
+	authCong, err := auth.New(authCfg)
+	if err != nil {
+		return fmt.Errorf("constructing authCong: %w", err)
+	}
+
+	// -------------------------------------------------------------------------
 	// Start Debug Service
 
 	log.Infow("startup", "status", "debug v1 router started", "host", cfg.Web.DebugHost)
@@ -105,6 +133,7 @@ func run(log *zap.SugaredLogger) error {
 	apiMux := handlers.APIMux(handlers.APIMuxConfig{
 		Shutdown: shutdown,
 		Log:      log,
+		Auth:     authCong,
 	})
 
 	server := http.Server{

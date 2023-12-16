@@ -25,9 +25,9 @@ type Claims struct {
 	Roles []user.Role `json:"roles"`
 }
 
-// KeyLookup declares a method set of behavior for looking up
-// private and public keys for JWT use. Since we are not sure is PEM format or other JWT format,
-// here we named is key string, generic for return could be a PEM encoded string or a JWS based key.
+// KeyLookup declares a method set of behavior for looking up private and public keys for JWT use.
+// here we named is as key instead of pem, why? because we are using OPA which needs pem format for the public key,
+// if in future we are not use OPA, for example jwt format, then we can rename it
 type KeyLookup interface {
 	PrivateKey(kid string) (key string, err error)
 	PublicKey(kid string) (key string, err error)
@@ -68,19 +68,23 @@ func New(cfg Config) (*Auth, error) {
 
 // GenerateToken generates a signed JWT token string representing the user Claims.
 func (a *Auth) GenerateToken(kid string, claims Claims) (string, error) {
+	// if you want to generate token, you give kid you give claims
 	token := jwt.NewWithClaims(a.method, claims)
+	// put kid in to the token
 	token.Header["kid"] = kid
 
+	// do the private key lookup from that kid, may be background hit the Vault or something else, then get the private key
 	privateKeyPEM, err := a.keyLookup.PrivateKey(kid)
 	if err != nil {
 		return "", fmt.Errorf("private key: %w", err)
 	}
-
+	// convert to pem format
 	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKeyPEM))
 	if err != nil {
 		return "", fmt.Errorf("parsing private pem: %w", err)
 	}
 
+	// sign the token
 	str, err := token.SignedString(privateKey)
 	if err != nil {
 		return "", fmt.Errorf("signing token: %w", err)
@@ -89,7 +93,7 @@ func (a *Auth) GenerateToken(kid string, claims Claims) (string, error) {
 	return str, nil
 }
 
-// Authenticate processes the token to validate the sender's token is valid.
+// Authenticate processes to validate the token's signature.
 func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, error) {
 	parts := strings.Split(bearerToken, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
@@ -97,13 +101,14 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 	}
 
 	var claims Claims
+	// parsing token back to claim, here we don't worry token if is valid ot not
+	// for valid token we use OPA in later steps.
 	token, _, err := a.parser.ParseUnverified(parts[1], &claims)
 	if err != nil {
 		return Claims{}, fmt.Errorf("error parsing token: %w", err)
 	}
 
 	// Perform an extra level of authentication verification with OPA.
-
 	kidRaw, exists := token.Header["kid"]
 	if !exists {
 		return Claims{}, fmt.Errorf("kid missing from header: %w", err)
@@ -114,11 +119,13 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 		return Claims{}, fmt.Errorf("kid malformed: %w", err)
 	}
 
+	// use keyStore find back the public key
 	pem, err := a.publicKeyLookup(kid)
 	if err != nil {
 		return Claims{}, fmt.Errorf("failed to fetch public key: %w", err)
 	}
 
+	// prepare input struct for opa to validate the token
 	input := map[string]any{
 		"Key":   pem,
 		"Token": parts[1],
@@ -129,8 +136,9 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string) (Claims, er
 		return Claims{}, fmt.Errorf("authentication failed : %w", err)
 	}
 
-	// Check the database for this user to verify they are still enabled.
-
+	// TODO additional check for authentication
+	//  check our the database for this user still enabled.
+	
 	return claims, nil
 }
 
