@@ -113,14 +113,20 @@ remove-none-images:
 	docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
 
 # ==============================================================================
-# Running from within k8s/kind
+# bootstrap the dev cluster
 
-# dev cluster up
-
+# dev cluster all in one up
 dev-up: dev-up-local
 	telepresence --context=kind-$(KIND_CLUSTER) helm install
+	telepresence --context=kind-ardan-starter-cluster quit -u
 	telepresence --context=kind-$(KIND_CLUSTER) connect
+# dev cluster all in one down
+dev-down:
+	kind delete cluster --name $(KIND_CLUSTER)
 
+# if you have issue to run telepresence, run it step by step
+# follow this link: https://www.telepresence.io/docs/latest/quick-start/
+# step 1
 dev-up-local:
 	kind create cluster \
 		--image $(KIND) \
@@ -128,48 +134,46 @@ dev-up-local:
 		--config zarf/k8s/dev/kind-config.yaml
 # what is local-path-storage namespace: https://mauilion.dev/posts/kind-pvc/
 	kubectl wait --timeout=120s --namespace=local-path-storage --for=condition=Available deployment/local-path-provisioner
-
+	
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
 
-dev-down:
-	kind delete cluster --name $(KIND_CLUSTER)
-
-dev-load:
-	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
-
-# if you have issue to run telepresence, run it seprately
-# follow this link: https://www.telepresence.io/docs/latest/quick-start/
+# step 2
+# if need password is @SHxx2014030104
 dev-load-telepresence:
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
 	telepresence --context=kind-ardan-starter-cluster helm install
 	telepresence --context=kind-ardan-starter-cluster quit -u
 	telepresence --context=kind-ardan-starter-cluster connect
 
-dev-down-local:
-	kind delete cluster --name $(KIND_CLUSTER)
-
-dev-apply:
-	kustomize build zarf/k8s/dev/sales | kubectl apply -f -
-	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --for=condition=Ready
-
 # ==============================================================================
+# re=deploy service on cluster
 
-dev-status:
-	kubectl get nodes -o wide
-	kubectl get svc -o wide
-	kubectl get pods -o wide --watch --all-namespaces
-
-dev-restart:
-	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
-
-# if you changed the binary then run this command to re-load image to kind cluster
+# if you changed the code then run this command to re-build the service
 dev-update: build dev-load dev-restart
 
 # if you changed the k8s configuration then run this command to re-apply new settings
 dev-update-apply: build dev-load dev-apply
 
-# ------------------------------------------------------------------------------
+dev-load:
+	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
 
+dev-restart:
+	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
+
+dev-apply:
+	kustomize build zarf/k8s/dev/sales | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --for=condition=Ready
+
+# ------------------------------------------------------------------------------
+# run monitoring commands
+
+# check dev status
+dev-status:
+	kubectl get nodes -o wide
+	kubectl get svc -o wide
+	kubectl get pods -o wide --watch --all-namespaces
+
+# check dev logs
 dev-logs:
 	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP) --all-containers=true -f --tail=100 | go run app/tooling/logfmt/main.go -service=$(SERVICE_NAME)
 	
@@ -180,6 +184,7 @@ dev-describe-sales:
 	kubectl describe pod --namespace=$(NAMESPACE) -l app=$(APP)
 
 # ==============================================================================
+# run commands
 run-scratch:
 	go run app/tooling/scratch/main.go
 
@@ -206,6 +211,10 @@ test-endpoint:
 test-endpoint-local:
 	curl -il localhost:3000/test
 
+# before tun commands below, you need to pump in token
+# `make run-scratch`, copy paste token value from the output
+# write token value into env variable: `export TOKEN=$token`
+# then run commands below
 test-endpoint-auth:
 	curl -il -H "Authorization: Bearer ${TOKEN}" $(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:3000/test/auth
 
