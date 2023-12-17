@@ -1,11 +1,10 @@
-// Package usersummary provides an example of a core business API that
+// Package summary provides an example of a core business API that
 // is based on a database view domain model so we keep them into package call cview.
-package usersummary
+package summary
 
 import (
 	"context"
 	"fmt"
-
 	"github.com/shawnzxx/service/business/data/order"
 )
 
