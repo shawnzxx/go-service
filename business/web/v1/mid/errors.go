@@ -2,6 +2,7 @@ package mid
 
 import (
 	"context"
+	"github.com/shawnzxx/service/business/sys/validate"
 	"net/http"
 
 	"github.com/shawnzxx/service/business/web/auth"
@@ -23,6 +24,14 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 				var status int
 
 				switch {
+				case validate.IsFieldErrors(err):
+					fieldErrors := validate.GetFieldErrors(err)
+					er = v1.ErrorResponse{
+						Error:  "data validation error",
+						Fields: fieldErrors.Fields(),
+					}
+					status = http.StatusBadRequest
+
 				case v1.IsRequestError(err):
 					reqErr := v1.GetRequestError(err)
 					er = v1.ErrorResponse{

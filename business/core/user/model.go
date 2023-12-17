@@ -8,8 +8,9 @@ import (
 )
 
 // User represents information about an individual user.
-// here each filed we try to use type instead of string as much as possible
-// so that upper layer need to use parse to covert to the type filed which help to do the validation.
+// for each filed we try to use strong type instead of normal string, int
+// upper layer need to use strong type to parse
+// which help to do the data validation before pass to business layer.
 type User struct {
 	ID           uuid.UUID
 	Name         string
@@ -23,7 +24,6 @@ type User struct {
 }
 
 // NewUser contains information needed to create a new user.
-// for CRUD we need to create separate struct for each operation instead of re-use same struct
 type NewUser struct {
 	Name            string
 	Email           mail.Address
@@ -33,9 +33,12 @@ type NewUser struct {
 	PasswordConfirm string
 }
 
-// UpdateUser contains information needed to update a user.
-// we use pointer semantic let upper layer decide what are fields needs to update
-// instead of provide the whole struct, because of pointer so if not provide will be nil
+// UpdateUser defines what information may be provided to modify an
+// existing User. All fields are optional so clients can send just the
+// fields they want changed. It uses pointer fields so we can differentiate
+// between a field that was not provided and a field that was provided as
+// explicitly blank. Normally we do not want to use pointers to basic types but
+// we make exceptions around marshalling/unmarshalling.
 type UpdateUser struct {
 	Name            *string
 	Email           *mail.Address
