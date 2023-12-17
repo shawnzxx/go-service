@@ -136,6 +136,8 @@ dev-up-local:
 	kubectl wait --timeout=120s --namespace=local-path-storage --for=condition=Available deployment/local-path-provisioner
 	
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
+	kind load docker-image $(POSTGRES) --name $(KIND_CLUSTER)
+
 
 # step 2
 # if need password is @SHxx2014030104
@@ -161,6 +163,9 @@ dev-restart:
 	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
 
 dev-apply:
+	kustomize build zarf/k8s/dev/database | kubectl apply -f -
+	kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=120s sts/database
+
 	kustomize build zarf/k8s/dev/sales | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --for=condition=Ready
 
@@ -232,3 +237,9 @@ readiness-local:
 
 readiness:
 	curl -il http://$(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:4000/debug/readiness
+
+pgcli-local:
+	pgcli postgresql://postgres:postgres@localhost
+
+pgcli:
+	pgcli postgresql://postgres:postgres@database-service.$(NAMESPACE).svc.cluster.local
