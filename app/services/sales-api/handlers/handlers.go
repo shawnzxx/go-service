@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/jmoiron/sqlx"
 	"net/http"
 	"os"
 
@@ -16,6 +17,7 @@ type APIMuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
 	Auth     *auth.Auth
+	DB       *sqlx.DB
 }
 
 // APIMux constructs a http.Handler with all application routes defined.
