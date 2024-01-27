@@ -106,3 +106,9 @@ we shall create middlewear layer to handle above two errors
 1. Authorisation flow 
    - After Authentication all passed, we can use claims to check what role and rights user have, then we can do Authorisation
    - We can pass authorisation flow to some 3rd party service like OPA (Open Policy Agent) to do authorisation, or we can do it in our own code
+
+## DB migrate
+we are using Darwin package to do DB migration, inside the migrate.sq, -- Version: 1.0x is important
+because Darwin package will use version to track current migration version in DB and schema table will keep migrated version in hash value
+if you need to change anything you need to create new version, if change on existing version which already migrated
+Darwin package will report error, since hash not matched.
