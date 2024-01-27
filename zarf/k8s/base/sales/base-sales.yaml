@@ -23,7 +23,13 @@ spec:
 
     spec:
       terminationGracePeriodSeconds: 60
-
+      
+      initContainers:
+        - name: init-migrate
+#          same service-image docker image but execute admin command for db migration program
+          image: service-image
+          command: ['./admin']
+          
       containers:
         - name: sales-api
           image: service-image

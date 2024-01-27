@@ -97,9 +97,9 @@ dev-docker:
 	
 # ==============================================================================
 # Building containers
-build:
+service:
 	docker build \
-		-f zarf/docker/dockerfile.service \
+		-f zarf/docker/Dockerfile \
 		-t $(SERVICE_IMAGE) \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
@@ -150,10 +150,10 @@ dev-load-telepresence:
 # re=deploy service on cluster
 
 # if you changed the code then run this command to re-build the service
-dev-update: build dev-load dev-restart
+dev-update: service dev-load dev-restart
 
 # if you changed the k8s configuration then run this command to re-apply new settings
-dev-update-apply: build dev-load dev-apply
+dev-update-apply: service dev-load dev-apply
 
 dev-load:
 	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
@@ -186,6 +186,10 @@ dev-describe-deployment:
 
 dev-describe-sales:
 	kubectl describe pod --namespace=$(NAMESPACE) -l app=$(APP)
+
+# use for check db migration logs when deployment restart 
+dev-logs-init:
+	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP) -f --tail=100 -c init-migrate
 
 # ==============================================================================
 # run commands
