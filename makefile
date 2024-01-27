@@ -55,7 +55,6 @@ GOLANG          := golang:1.21.3
 ALPINE          := alpine:3.18
 KIND            := kindest/node:v1.27.3
 POSTGRES        := postgres:15.4
-VAULT           := hashicorp/vault:1.15
 TELEPRESENCE    := datawire/tel2:2.16.1
 
 KIND_CLUSTER    := ardan-starter-cluster
@@ -94,7 +93,6 @@ dev-docker:
 	docker pull $(ALPINE)
 	docker pull $(KIND)
 	docker pull $(POSTGRES)
-	docker pull $(VAULT)
 	docker pull $(TELEPRESENCE)
 	
 # ==============================================================================
@@ -116,6 +114,7 @@ remove-none-images:
 # bootstrap the dev cluster
 
 # dev cluster all in one up
+#telepresence password is @SHxx20xxxx0x04
 dev-up: dev-up-local
 	telepresence --context=kind-$(KIND_CLUSTER) helm install
 	telepresence --context=kind-ardan-starter-cluster quit -u
@@ -140,7 +139,7 @@ dev-up-local:
 
 
 # step 2
-# if need password is @SHxx2014030104
+# if need password is @SHxx20xxxx0x04
 dev-load-telepresence:
 	kind load docker-image $(TELEPRESENCE) --name $(KIND_CLUSTER)
 	telepresence --context=kind-ardan-starter-cluster helm install
@@ -243,3 +242,6 @@ pgcli-local:
 
 pgcli:
 	pgcli postgresql://postgres:postgres@database-service.$(NAMESPACE).svc.cluster.local
+
+migrate:
+	go run app/tooling/admin/main.go
