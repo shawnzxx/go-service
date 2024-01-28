@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// User represents information about an individual user.
-// for each filed we try to use strong type instead of normal string, int
+// User represents exportable domain model for User
+// each filed we try to use strong type instead of normal string, int
 // upper layer need to use strong type to parse
 // which help to do the data validation before pass to business layer.
 type User struct {
