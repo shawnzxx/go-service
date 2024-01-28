@@ -247,5 +247,14 @@ pgcli-local:
 pgcli:
 	pgcli postgresql://postgres:postgres@database-service.$(NAMESPACE).svc.cluster.local
 
+# test db migration manually
 migrate:
 	go run app/tooling/admin/main.go
+
+# test /order endpoint, use "make query-local | jq" to test
+query-local:
+	@curl -s "http://localhost:3000/users?page=1&rows=2&orderBy=name,ASC"
+
+# test /order endpoint, use "make query | jq" to test
+query:
+	@curl -s "http://$(SERVICE_NAME).$(NAMESPACE).svc.cluster.local:3000/users?page=1&rows=2&orderBy=name,ASC"
